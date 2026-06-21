@@ -2,12 +2,13 @@
 
 import { useI18n } from '@/components/LanguageProvider';
 import ScrollReveal from '@/components/ScrollReveal';
+import SectionReveal from '@/components/SectionReveal';
 
 export default function SiteFooter() {
   const { t } = useI18n();
 
   return (
-    <footer className="border-t border-[var(--hairline)] bg-ocean-night px-6 py-10">
+    <SectionReveal as="footer" className="bg-ocean-night px-6 py-10">
       <ScrollReveal className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
         <div className="flex items-center gap-2.5">
           <svg width="18" height="18" viewBox="0 0 32 32" aria-hidden="true">
@@ -24,6 +25,6 @@ export default function SiteFooter() {
           © {new Date().getFullYear()} · {t('footer.built')}
         </p>
       </ScrollReveal>
-    </footer>
+    </SectionReveal>
   );
 }

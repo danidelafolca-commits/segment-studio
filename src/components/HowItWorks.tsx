@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { useI18n } from '@/components/LanguageProvider';
 import { LetterSwapAppear } from '@/components/LetterSwap';
 import ScrollReveal from '@/components/ScrollReveal';
+import SectionReveal from '@/components/SectionReveal';
 
 const iconProps = {
   width: 22,
@@ -45,9 +46,9 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section
+    <SectionReveal
       id="how"
-      className="relative w-full scroll-mt-24 border-t border-[var(--hairline)] bg-ocean-deep/50 px-6 py-24 md:py-32"
+      className="relative w-full scroll-mt-24 bg-ocean-deep/50 px-6 py-24 md:py-32"
     >
       <div className="relative mx-auto max-w-6xl">
         <ScrollReveal className="mb-14 text-center">
@@ -83,6 +84,6 @@ export default function HowItWorks() {
           ))}
         </ol>
       </div>
-    </section>
+    </SectionReveal>
   );
 }

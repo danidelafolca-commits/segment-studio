@@ -11,6 +11,7 @@ import type { AnalyzeResponse, AnalyzeResult } from '@/lib/roboflow';
 import { useI18n } from '@/components/LanguageProvider';
 import { LetterSwapAppear } from '@/components/LetterSwap';
 import ScrollReveal from '@/components/ScrollReveal';
+import SectionReveal from '@/components/SectionReveal';
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png'];
 
@@ -158,7 +159,7 @@ export default function ParticleAnalyzer() {
     : [];
 
   return (
-    <section
+    <SectionReveal
       id="workspace"
       className="relative w-full scroll-mt-24 bg-ocean-night/50 px-6 py-24 md:py-32"
     >
@@ -365,6 +366,6 @@ export default function ParticleAnalyzer() {
           </ScrollReveal>
         </div>
       </div>
-    </section>
+    </SectionReveal>
   );
 }
