@@ -105,6 +105,22 @@ export function LetterSwapPingPong({
     delay: stagger(staggerDuration, { from: staggerFrom }),
   });
 
+  const reduced = useReducedMotion();
+  const inView = useInView(scope, { once: true, amount: 0.6 });
+
+  // Play one swap automatically when it scrolls into view (in addition to hover).
+  useEffect(() => {
+    if (!inView || reduced) return;
+    const merged = merge(transition);
+    animate('.letter', { y: reverse ? '100%' : '-100%' }, merged).then(() => {
+      animate('.letter', { y: 0 }, { duration: 0 });
+    });
+    animate('.letter-secondary', { top: '0%' }, merged).then(() => {
+      animate('.letter-secondary', { top: reverse ? '-100%' : '100%' }, { duration: 0 });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inView, reduced]);
+
   const hoverStart = () => {
     animate('.letter', { y: reverse ? '100%' : '-100%' }, merge(transition));
     animate('.letter-secondary', { top: '0%' }, merge(transition));
@@ -143,7 +159,9 @@ export function LetterSwapAppear({
   onClick,
 }: TextProps) {
   const [scope, animate] = useAnimate();
-  const inView = useInView(scope, { once: true, amount: 0.4 });
+  // Fire once the heading is well into view (not while the scroll-reveal still
+  // has it faded out), so the letter flip is actually visible.
+  const inView = useInView(scope, { once: true, amount: 0.4, margin: '0px 0px -30% 0px' });
   const reduced = useReducedMotion();
 
   const play = useCallback(() => {
