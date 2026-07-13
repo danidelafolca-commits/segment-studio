@@ -58,6 +58,7 @@ export const translations: Record<Lang, Dict> = {
     "class.particle": "Partículas",
     "class.fiber": "Fibras",
     "class.fragment": "Fragmentos",
+    "class.sphere": "Esferas",
 
     "err.format": "Formato no soportado. Sube una imagen JPG o PNG.",
     "err.read": "No se pudo leer la imagen.",
@@ -130,6 +131,7 @@ export const translations: Record<Lang, Dict> = {
     "class.particle": "Particles",
     "class.fiber": "Fibers",
     "class.fragment": "Fragments",
+    "class.sphere": "Spheres",
 
     "err.format": "Unsupported format. Upload a JPG or PNG image.",
     "err.read": "Couldn't read the image.",
@@ -202,6 +204,7 @@ export const translations: Record<Lang, Dict> = {
     "class.particle": "Partícules",
     "class.fiber": "Fibres",
     "class.fragment": "Fragments",
+    "class.sphere": "Esferes",
 
     "err.format": "Format no compatible. Puja una imatge JPG o PNG.",
     "err.read": "No s'ha pogut llegir la imatge.",

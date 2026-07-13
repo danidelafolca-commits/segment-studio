@@ -19,6 +19,7 @@ const KNOWN_CLASSES = [
   { key: 'particle', dot: '#15b8b8' },
   { key: 'fiber', dot: '#2fd4d4' },
   { key: 'fragment', dot: '#f0a83c' },
+  { key: 'sphere', dot: '#a78bfa' },
 ] as const;
 
 function fileToBase64(file: File): Promise<string> {
@@ -322,7 +323,7 @@ export default function ParticleAnalyzer() {
 
                 <div className="rounded-2xl border border-[var(--hairline)] bg-ocean-deep/40 p-5">
                   <p className="mb-4 font-mono text-xs uppercase tracking-widest text-ice-blue/50">{t('ws.breakdown')}</p>
-                  <ul className="grid grid-cols-3 gap-3">
+                  <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {KNOWN_CLASSES.map(({ key, dot }) => (
                       <li key={key} className="flex flex-col items-center gap-1 rounded-xl border border-[var(--hairline)] bg-ocean-night/50 py-4">
                         <span className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-ice-blue/70">
