@@ -83,6 +83,9 @@ export const translations: Record<Lang, Dict> = {
 
     "footer.tagline": "Detección de partículas · Roboflow + SAM3",
     "footer.built": "Hecho con Next.js",
+    "footer.academic": "Este proyecto fue creado con fines académicos.",
+    "footer.author":
+      "Desarrollado por Quim Espigares Montes, estudiante del Ins Fontanelles.",
   },
 
   en: {
@@ -156,6 +159,9 @@ export const translations: Record<Lang, Dict> = {
 
     "footer.tagline": "Particle detection · Roboflow + SAM3",
     "footer.built": "Built with Next.js",
+    "footer.academic": "This project was created for academic purposes.",
+    "footer.author":
+      "Developed by Quim Espigares Montes, student at Ins Fontanelles.",
   },
 
   ca: {
@@ -229,6 +235,9 @@ export const translations: Record<Lang, Dict> = {
 
     "footer.tagline": "Detecció de partícules · Roboflow + SAM3",
     "footer.built": "Fet amb Next.js",
+    "footer.academic": "Aquest projecte s'ha creat amb finalitats acadèmiques.",
+    "footer.author":
+      "Desenvolupat per Quim Espigares Montes, estudiant de l'Ins Fontanelles.",
   },
 };
 

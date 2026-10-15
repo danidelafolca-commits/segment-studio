@@ -25,6 +25,13 @@ export default function SiteFooter() {
           © {new Date().getFullYear()} · {t('footer.built')}
         </p>
       </ScrollReveal>
+      <ScrollReveal
+        order={1}
+        className="mx-auto mt-8 max-w-7xl border-t border-[var(--hairline)] pt-6 text-center"
+      >
+        <p className="text-sm text-ice-blue/70">{t('footer.academic')}</p>
+        <p className="mt-1.5 font-mono text-xs text-ice-blue/45">{t('footer.author')}</p>
+      </ScrollReveal>
     </SectionReveal>
   );
 }
