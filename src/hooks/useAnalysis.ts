@@ -1,7 +1,7 @@
 "use client";
 
 import { useDeferredValue, useMemo, useState } from "react";
-import type { AnalyzeResult, Detection, ImageDims } from "@/lib/roboflow";
+import { cleanDetections, type AnalyzeResult, type Detection, type ImageDims } from "@/lib/roboflow";
 import { computeMetrics, classifyShape, DEFAULT_SHAPE_RULES, type Metrics, type ShapeClass } from "@/lib/morphometry";
 import { isValidFor, type Calibration } from "@/lib/calibration";
 import { prMetrics, type Label } from "@/lib/stats";
@@ -16,7 +16,7 @@ export interface Filters {
   hiddenClasses: string[];
 }
 
-export const DEFAULT_FILTERS: Filters = { tau: 0.4, minAreaPx: 0, excludeBorder: false, hiddenClasses: [] };
+export const DEFAULT_FILTERS: Filters = { tau: 0.4, minAreaPx: 20, excludeBorder: false, hiddenClasses: [] };
 
 export interface Row {
   det: Detection;
@@ -63,7 +63,7 @@ export function useAnalysis(result: AnalyzeResult | null, natural: ImageDims | n
   // Heavy work: once per result / calibration, NOT per slider tick.
   const rows: Row[] = useMemo(() => {
     if (!result) return [];
-    const dets = rescale(result.detections, result.image, natural);
+    const dets = cleanDetections(rescale(result.detections, result.image, natural), natural ?? result.image);
     return dets.map((det) => {
       const metrics = computeMetrics(det, k, dims);
       return { det, metrics, shape: classifyShape(metrics, DEFAULT_SHAPE_RULES) };

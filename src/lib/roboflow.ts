@@ -175,3 +175,37 @@ export function countDetectionsByClass(dets: Detection[]): Record<string, number
   for (const d of dets) counts[d.cls] = (counts[d.cls] ?? 0) + 1;
   return counts;
 }
+
+export interface CleanOptions {
+  /** Drop detections whose bbox covers more than this fraction of the image (background masks). */
+  maxImageFraction: number;
+  /** Class-agnostic IoU above which the lower-confidence detection is dropped. */
+  dedupIou: number;
+}
+
+export const DEFAULT_CLEAN: CleanOptions = { maxImageFraction: 0.05, dedupIou: 0.5 };
+
+function bboxIou(a: Detection["bbox"], b: Detection["bbox"]): number {
+  const ix = Math.max(0, Math.min(a[0] + a[2], b[0] + b[2]) - Math.max(a[0], b[0]));
+  const iy = Math.max(0, Math.min(a[1] + a[3], b[1] + b[3]) - Math.max(a[1], b[1]));
+  const inter = ix * iy;
+  const union = a[2] * a[3] + b[2] * b[3] - inter;
+  return union > 0 ? inter / union : 0;
+}
+
+/** Remove workflow artefacts: giant background masks and cross-class duplicates. */
+export function cleanDetections(
+  dets: Detection[],
+  image: ImageDims | null,
+  opts: CleanOptions = DEFAULT_CLEAN
+): Detection[] {
+  const maxBox = image ? image.width * image.height * opts.maxImageFraction : Infinity;
+  const kept = dets
+    .filter((d) => d.bbox[2] * d.bbox[3] <= maxBox)
+    .sort((a, b) => b.confidence - a.confidence);
+  const out: Detection[] = [];
+  for (const d of kept) {
+    if (!out.some((k) => bboxIou(k.bbox, d.bbox) >= opts.dedupIou)) out.push(d);
+  }
+  return out;
+}
