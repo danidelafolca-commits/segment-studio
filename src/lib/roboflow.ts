@@ -17,18 +17,44 @@ export interface Sam3Output {
   [key: string]: unknown;
 }
 
+export interface Point {
+  x: number;
+  y: number;
+}
+
+/** A detection normalised to ORIGINAL image pixels (top-left bbox origin). */
+export interface Detection {
+  id: string;
+  cls: string;
+  classId: number | null;
+  confidence: number;
+  /** [x0, y0, w, h] — top-left corner, in image pixels. */
+  bbox: [number, number, number, number];
+  /** Polygon vertices in image pixels (empty if the model gave none). */
+  points: Point[];
+}
+
+export interface ImageDims {
+  width: number;
+  height: number;
+}
+
 /** Normalised payload that /api/analyze returns to the client. */
 export interface AnalyzeResult {
   /** Annotated image as base64 WITHOUT the `data:` prefix (or null). */
   annotatedImage: string | null;
-  /** Total objects detected (from `box_count`, falling back to predictions). */
+  /** Total objects detected (always derived from detections when available). */
   boxCount: number;
   /** Summary text from `vision_events_message` (or null). */
   message: string | null;
   /** Count per class (lowercased name -> count), derived from `sam_3_output`. */
   classCounts: Record<string, number>;
-  /** Raw SAM3 predictions, passed through untouched. */
-  predictions: Sam3Output | null;
+  /** Detections normalised to image pixels. */
+  detections: Detection[];
+  /** Dimensions of the image as seen by the model (or null if unknown). */
+  image: ImageDims | null;
+  /** Roboflow inference id, if the workflow provided one. */
+  inferenceId: string | null;
 }
 
 export interface AnalyzeErrorResult {
@@ -98,4 +124,54 @@ export function coerceMessage(value: unknown): string | null {
     }
   }
   return null;
+}
+
+function num(v: unknown): number | null {
+  return typeof v === 'number' && Number.isFinite(v) ? v : null;
+}
+
+/** Image dimensions reported by the model, if any. */
+export function extractImageDims(sam3: unknown): ImageDims | null {
+  if (!sam3 || typeof sam3 !== 'object' || Array.isArray(sam3)) return null;
+  const img = (sam3 as { image?: { width?: unknown; height?: unknown } }).image;
+  const w = num(img?.width);
+  const h = num(img?.height);
+  return w && h && w > 0 && h > 0 ? { width: w, height: h } : null;
+}
+
+/** Convert raw predictions into Detections in image pixels.
+ *  Roboflow x/y are the CENTRE of the box; we store the top-left corner. */
+export function normalizeDetections(sam3: unknown): Detection[] {
+  const out: Detection[] = [];
+  getPredictions(sam3).forEach((p, i) => {
+    const raw = p as Record<string, unknown>;
+    const cls = predictionClass(p) ?? 'unknown';
+    const w = num(raw.width) ?? 0;
+    const h = num(raw.height) ?? 0;
+    const cx = num(raw.x) ?? 0;
+    const cy = num(raw.y) ?? 0;
+    const pts: Point[] = [];
+    if (Array.isArray(raw.points)) {
+      for (const q of raw.points as Array<Record<string, unknown>>) {
+        const px = num(q?.x);
+        const py = num(q?.y);
+        if (px !== null && py !== null) pts.push({ x: px, y: py });
+      }
+    }
+    out.push({
+      id: typeof raw.detection_id === 'string' ? raw.detection_id : `det-${i}`,
+      cls,
+      classId: num(raw.class_id),
+      confidence: num(p.confidence) ?? 0,
+      bbox: [cx - w / 2, cy - h / 2, w, h],
+      points: pts,
+    });
+  });
+  return out;
+}
+
+export function countDetectionsByClass(dets: Detection[]): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const d of dets) counts[d.cls] = (counts[d.cls] ?? 0) + 1;
+  return counts;
 }

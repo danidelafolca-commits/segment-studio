@@ -166,7 +166,27 @@ export default function FluidParticles({
       return () => window.removeEventListener('resize', onResize);
     }
 
+    // Precomputed fill styles: [colour][opacity level] — no string allocation per frame.
+    const LEVELS = 16;
+    const styleTable = PARTICLE_COLORS.map(([r, g, b]) =>
+      Array.from({ length: LEVELS + 1 }, (_, i) => `rgba(${r},${g},${b},${((i / LEVELS) * 0.18).toFixed(3)})`)
+    );
+    const colorIndex = new Map<[number, number, number], number>(
+      PARTICLE_COLORS.map((c, i) => [c, i] as [[number, number, number], number])
+    );
+
+    // Pause while the analyser is working (frees the main thread).
+    let paused = false;
+    const onBusy = (e: Event) => {
+      paused = !!(e as CustomEvent<boolean>).detail;
+    };
+    window.addEventListener('partikel:busy', onBusy);
+
     const tick = () => {
+      if (paused) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
       ctx.fillStyle = TRAIL;
       ctx.fillRect(0, 0, width, height);
       const t = Date.now() * 0.0001;
@@ -188,8 +208,8 @@ export default function FluidParticles({
         if (p.x > width) p.x = 0;
         if (p.y < 0) p.y = height;
         if (p.y > height) p.y = 0;
-        const [r, g, b] = p.color;
-        ctx.fillStyle = `rgba(${r},${g},${b},${opacity})`;
+        const level = Math.round((opacity / 0.18) * LEVELS);
+        ctx.fillStyle = styleTable[colorIndex.get(p.color) ?? 0][Math.max(0, Math.min(LEVELS, level))];
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
@@ -204,6 +224,7 @@ export default function FluidParticles({
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
+      window.removeEventListener('partikel:busy', onBusy);
     };
   }, [particleCount, noiseIntensity, particleSize.min, particleSize.max]);
 

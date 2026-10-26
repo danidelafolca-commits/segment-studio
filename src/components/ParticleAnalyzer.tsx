@@ -1,13 +1,25 @@
 'use client';
 
 import {
+  useCallback,
+  useEffect,
+  useMemo,
   useRef,
   useState,
   type ChangeEvent,
   type DragEvent,
   type KeyboardEvent,
 } from 'react';
-import type { AnalyzeResponse, AnalyzeResult } from '@/lib/roboflow';
+import type { AnalyzeResult, ImageDims, Point } from '@/lib/roboflow';
+import { AnalyzeError, MAX_FILE_BYTES, analyzeFile, imageDims } from '@/lib/analyzeClient';
+import { useAnalysis } from '@/hooks/useAnalysis';
+import { DEFAULT_SHAPE_RULES } from '@/lib/morphometry';
+import DetectionOverlay from '@/components/DetectionOverlay';
+import CalibrationTool, { type CalMode } from '@/components/CalibrationTool';
+import ThresholdPanel from '@/components/ThresholdPanel';
+import BlankControlPanel, { type BlankSummary } from '@/components/BlankControlPanel';
+import MorphometryTable from '@/components/MorphometryTable';
+import ExportButton from '@/components/ExportButton';
 import { useI18n } from '@/components/LanguageProvider';
 import { LetterSwapAppear } from '@/components/LetterSwap';
 import ScrollReveal from '@/components/ScrollReveal';
@@ -22,35 +34,19 @@ const KNOWN_CLASSES = [
   { key: 'sphere', dot: '#a78bfa' },
 ] as const;
 
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const value = reader.result;
-      if (typeof value !== 'string') {
-        reject(new Error('read'));
-        return;
-      }
-      const comma = value.indexOf(',');
-      resolve(comma >= 0 ? value.slice(comma + 1) : value);
-    };
-    reader.onerror = () => reject(new Error('file'));
-    reader.readAsDataURL(file);
-  });
+/** Decode base64 once into a Blob (avoids rebuilding a multi-MB data URL per render). */
+function base64ToBlob(b64: string): Blob {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  const mime = b64.startsWith('iVBOR') ? 'image/png' : b64.startsWith('R0lGOD') ? 'image/gif' : 'image/jpeg';
+  return new Blob([bytes], { type: mime });
 }
 
-function dataUrlFromBase64(b64: string): string {
-  const mime = b64.startsWith('iVBOR')
-    ? 'image/png'
-    : b64.startsWith('R0lGOD')
-      ? 'image/gif'
-      : 'image/jpeg';
-  return `data:${mime};base64,${b64}`;
-}
-
-function isError(r: AnalyzeResponse): r is { error: string; detail?: string } {
-  return typeof (r as { error?: unknown }).error === 'string';
-}
+const newId = () =>
+  typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 function Spinner({ className = '' }: { className?: string }) {
   return (
@@ -78,6 +74,66 @@ export default function ParticleAnalyzer() {
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const previewRef = useRef<string | null>(null);
+
+  const [naturalState, setNaturalState] = useState<{ file: File; dims: ImageDims } | null>(null);
+  const [calMode, setCalMode] = useState<CalMode | null>(null);
+  const [calPoints, setCalPoints] = useState<Point[]>([]);
+  const [blank, setBlank] = useState<BlankSummary | null>(null);
+  const [analysisId, setAnalysisId] = useState('');
+  const [annotatedUrl, setAnnotatedUrl] = useState<string | null>(null);
+
+  // Natural pixel size of the uploaded image (what all measurements refer to).
+  // Keyed by file so a stale value is never used for a newer image.
+  const natural = naturalState && naturalState.file === file ? naturalState.dims : null;
+  const a = useAnalysis(result, natural);
+
+  // Keep the latest preview URL for unmount cleanup; cancel in-flight requests.
+  useEffect(() => {
+    previewRef.current = previewUrl;
+  }, [previewUrl]);
+  useEffect(
+    () => () => {
+      abortRef.current?.abort();
+      if (previewRef.current) URL.revokeObjectURL(previewRef.current);
+    },
+    []
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    if (file) {
+      imageDims(file)
+        .then((dims) => !cancelled && setNaturalState({ file, dims }))
+        .catch(() => {});
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [file]);
+
+  // Annotated image blob URL: created in the analyze handler, revoked here.
+  const annotatedRef = useRef<string | null>(null);
+  const setAnnotated = (url: string | null) => {
+    if (annotatedRef.current) URL.revokeObjectURL(annotatedRef.current);
+    annotatedRef.current = url;
+    setAnnotatedUrl(url);
+  };
+  useEffect(
+    () => () => {
+      if (annotatedRef.current) URL.revokeObjectURL(annotatedRef.current);
+    },
+    []
+  );
+
+  // Pause the decorative background animation while analysing.
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('partikel:busy', { detail: loading }));
+    return () => {
+      window.dispatchEvent(new CustomEvent('partikel:busy', { detail: false }));
+    };
+  }, [loading]);
 
   const acceptFile = (f: File | undefined | null) => {
     if (!f) return;
@@ -85,8 +141,19 @@ export default function ParticleAnalyzer() {
       setError(t('err.format'));
       return;
     }
+    if (f.size > MAX_FILE_BYTES) {
+      setError(t('err.size'));
+      return;
+    }
+    abortRef.current?.abort();
+    setLoading(false);
     setError(null);
     setResult(null);
+    setAnnotated(null);
+    setCalMode(null);
+    setCalPoints([]);
+    a.setCalibration(null);
+    setBlank(null);
     setFile(f);
     setPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
@@ -121,44 +188,86 @@ export default function ParticleAnalyzer() {
 
   const analyze = async () => {
     if (!file) return;
+    abortRef.current?.abort();
+    const ctrl = new AbortController();
+    abortRef.current = ctrl;
     setLoading(true);
     setError(null);
     setResult(null);
+    setAnnotated(null);
     try {
-      const base64 = await fileToBase64(file);
-      const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: base64 }),
-      });
-      const data: AnalyzeResponse = await res.json();
-      if (!res.ok || isError(data)) {
-        throw new Error(isError(data) ? data.error : t('err.analyze'));
-      }
+      const data = await analyzeFile(file, ctrl.signal);
+      if (ctrl.signal.aborted) return;
+      setAnalysisId(newId());
+      setAnnotated(data.annotatedImage ? URL.createObjectURL(base64ToBlob(data.annotatedImage)) : null);
       setResult(data);
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : t('err.unexpected'));
+      if (ctrl.signal.aborted) return;
+      if (err instanceof AnalyzeError) {
+        setError(err.code === 'server' && err.message !== 'server' ? err.message : t(`err.${err.code}`));
+      } else {
+        setError(t('err.unexpected'));
+      }
     } finally {
-      setLoading(false);
+      if (abortRef.current === ctrl) setLoading(false);
     }
   };
 
   const reset = () => {
+    abortRef.current?.abort();
+    setLoading(false);
     setResult(null);
+    setAnnotated(null);
     setError(null);
     setFile(null);
+    setCalMode(null);
+    setCalPoints([]);
+    a.setCalibration(null);
+    setBlank(null);
     setPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return null;
     });
   };
 
-  const extraClasses = result
-    ? Object.keys(result.classCounts).filter(
-        (c) => !KNOWN_CLASSES.some((k) => k.key === c)
-      )
-    : [];
+  const extraClasses = Object.keys(a.counts.byClass).filter(
+    (c) => !KNOWN_CLASSES.some((k) => k.key === c)
+  );
 
+  const hasGeometry = a.rows.length > 0 && !!a.dims;
+  const picking = calMode !== null && calPoints.length < (calMode === 'circle' ? 3 : 2);
+  const onPick = useCallback((p: Point) => setCalPoints((prev) => [...prev, p]), []);
+
+  const getExportInput = () => {
+    return {
+      blob: file as Blob,
+      analysisId,
+      file: { name: file?.name ?? '', mime: file?.type ?? '', bytes: file?.size ?? 0 },
+      image: a.dims,
+      inferenceId: result?.inferenceId ?? null,
+      calibration: a.calibration,
+      filters: {
+        confidenceThreshold: a.filters.tau,
+        minAreaPx: a.filters.minAreaPx,
+        excludeBorder: a.filters.excludeBorder,
+        classes: a.classes.filter((c) => !a.filters.hiddenClasses.includes(c)),
+      },
+      shapeRules: DEFAULT_SHAPE_RULES,
+      objects: a.visible.map((r) => ({ det: r.det, metrics: r.metrics, shape: r.shape, label: a.labels[r.det.id] ?? null })),
+      validation: a.pr,
+      blank: blank
+        ? {
+            blankCount: blank.nBlanks,
+            sampleDensityPerMm2: blank.sampleDensity,
+            correctedDensityPerMm2: blank.corrected,
+            lodPerMm2: blank.lod,
+            belowLod: blank.belowLod,
+          }
+        : null,
+    };
+  };
+  const onBlankSummary = useCallback((s: BlankSummary | null) => setBlank(s), []);
+  const shapeEntries = useMemo(() => Object.entries(a.counts.byShape), [a.counts.byShape]);
   return (
     <SectionReveal
       id="workspace"
@@ -299,9 +408,25 @@ export default function ParticleAnalyzer() {
               <div className="flex flex-col gap-4">
                 <div className="overflow-hidden rounded-2xl border border-[var(--hairline)] bg-ocean-deep/40 shadow-lab">
                   <div className="relative aspect-video w-full bg-ocean-night">
-                    {result.annotatedImage ? (
+                    {hasGeometry && previewUrl && a.dims ? (
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={previewUrl} alt={file?.name ?? t('ws.original')} decoding="async" className="h-full w-full object-contain" />
+                        <DetectionOverlay
+                          dims={a.dims}
+                          rows={a.visible}
+                          selectedId={a.selectedId}
+                          labels={a.labels}
+                          onSelect={a.setSelectedId}
+                          picking={picking}
+                          onPick={onPick}
+                          markers={calPoints}
+                          markerShape={calMode}
+                        />
+                      </>
+                    ) : annotatedUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={dataUrlFromBase64(result.annotatedImage)} alt={t('ws.annotated')} className="h-full w-full object-contain" />
+                      <img src={annotatedUrl} alt={t('ws.annotated')} decoding="async" className="h-full w-full object-contain" />
                     ) : (
                       <div className="flex h-full items-center justify-center p-6 text-center font-mono text-xs text-ice-blue/50">
                         {t('ws.no_annotated')}
@@ -318,8 +443,20 @@ export default function ParticleAnalyzer() {
                     <p className="font-mono text-xs uppercase tracking-widest text-ice-blue/55">{t('ws.detections')}</p>
                     <p className="text-sm text-ice-white">{t('ws.particles_detected')}</p>
                   </div>
-                  <span className="font-display text-5xl font-bold tabular-nums text-accent">{result.boxCount}</span>
+                  <div className="text-right">
+                    <span className="font-display text-5xl font-bold tabular-nums text-accent">
+                      {hasGeometry ? a.visible.length : result.boxCount}
+                    </span>
+                    {hasGeometry && (
+                      <p className="font-mono text-[11px] text-ice-blue/50">
+                        {t('ws.shown')} / {a.rows.length}
+                      </p>
+                    )}
+                  </div>
                 </div>
+
+                {hasGeometry && <p className="font-mono text-[11px] text-ice-blue/40">{t('ws.overlay_note')}</p>}
+                {a.scaleMismatch && <p className="font-mono text-[11px] text-[#f0a83c]">{t('ws.scale_warn')}</p>}
 
                 <div className="rounded-2xl border border-[var(--hairline)] bg-ocean-deep/40 p-5">
                   <p className="mb-4 font-mono text-xs uppercase tracking-widest text-ice-blue/50">{t('ws.breakdown')}</p>
@@ -331,7 +468,7 @@ export default function ParticleAnalyzer() {
                           {t(`class.${key}`)}
                         </span>
                         <span className="font-display text-2xl font-bold tabular-nums text-ice-white">
-                          {result.classCounts[key] ?? 0}
+                          {(hasGeometry ? a.counts.byClass : result.classCounts)[key] ?? 0}
                         </span>
                       </li>
                     ))}
@@ -339,7 +476,12 @@ export default function ParticleAnalyzer() {
                   {extraClasses.length > 0 && (
                     <p className="mt-4 font-mono text-xs text-ice-blue/50">
                       {t('ws.other_classes')}{' '}
-                      {extraClasses.map((c) => `${c} (${result.classCounts[c]})`).join(' · ')}
+                      {extraClasses.map((c) => `${c} (${a.counts.byClass[c]})`).join(' · ')}
+                    </p>
+                  )}
+                  {a.calibration && shapeEntries.length > 0 && (
+                    <p className="mt-4 font-mono text-xs text-ice-blue/50">
+                      {t('morph.shape')}: {shapeEntries.map(([s, n]) => `${s} (${n})`).join(' · ')}
                     </p>
                   )}
                 </div>
@@ -349,6 +491,24 @@ export default function ParticleAnalyzer() {
                     <p className="mb-2 font-mono text-xs uppercase tracking-widest text-ice-blue/50">{t('ws.summary')}</p>
                     <p className="text-sm leading-relaxed text-ice-blue/90">{result.message}</p>
                   </div>
+                )}
+
+                {hasGeometry && a.dims && (
+                  <>
+                    <CalibrationTool
+                      dims={a.dims}
+                      calibration={a.calibration}
+                      onCalibration={a.setCalibration}
+                      mode={calMode}
+                      onMode={setCalMode}
+                      points={calPoints}
+                      onPoints={setCalPoints}
+                    />
+                    <ThresholdPanel a={a} />
+                    <BlankControlPanel a={a} onSummary={onBlankSummary} />
+                    <MorphometryTable a={a} />
+                    <ExportButton getInput={getExportInput} disabled={!file || a.rows.length === 0} />
+                  </>
                 )}
               </div>
             ) : (
