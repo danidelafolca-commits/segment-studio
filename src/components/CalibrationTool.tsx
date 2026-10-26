@@ -9,6 +9,7 @@ import {
   fromLine,
   loadProfiles,
   saveProfile,
+  saveDefaultCalibration,
   isValidFor,
   type CalUnit,
   type Calibration,
@@ -37,6 +38,7 @@ export default function CalibrationTool({ dims, calibration, onCalibration, mode
   // Rendered only after a result exists (client-side), so reading localStorage here is safe.
   const [profiles, setProfiles] = useState<CalProfiles>(() => loadProfiles());
   const [profileName, setProfileName] = useState('');
+  const [defaultSaved, setDefaultSaved] = useState(false);
 
   const needed = mode === 'circle' ? 3 : 2;
   const real = parseFloat(value.replace(',', '.'));
@@ -125,6 +127,21 @@ export default function CalibrationTool({ dims, calibration, onCalibration, mode
         </div>
       )}
       {!calibration && !mode && <p className="mt-3 text-xs text-ice-blue/45">{t('cal.none')}</p>}
+
+      {calibration && (
+        <div className="mt-3 flex items-center gap-3">
+          <button
+            onClick={() => {
+              saveDefaultCalibration(calibration);
+              setDefaultSaved(true);
+            }}
+            className={`${chip} border-accent/50 text-accent`}
+          >
+            {t('cal.default')}
+          </button>
+          {defaultSaved && <span className="text-xs text-ice-blue/60">{t('cal.default_saved')}</span>}
+        </div>
+      )}
 
       <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-[var(--hairline)] pt-3">
         <input

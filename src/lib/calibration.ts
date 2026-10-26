@@ -96,6 +96,34 @@ export function saveProfile(name: string, cal: Calibration) {
   } catch {}
 }
 
+const DEFAULT_KEY = "partikel.defaultCalibration";
+
+export function loadDefaultCalibration(): Calibration | null {
+  try {
+    const raw = localStorage.getItem(DEFAULT_KEY);
+    return raw ? (JSON.parse(raw) as Calibration) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveDefaultCalibration(cal: Calibration | null) {
+  try {
+    if (cal) localStorage.setItem(DEFAULT_KEY, JSON.stringify(cal));
+    else localStorage.removeItem(DEFAULT_KEY);
+  } catch {}
+}
+
+/** Same optics, different pixel grid: rescale k by the width ratio if the aspect ratio matches. */
+export function adaptTo(cal: Calibration, dims: { width: number; height: number }): Calibration | null {
+  if (isValidFor(cal, dims)) return cal;
+  const a = cal.imageDims.width / cal.imageDims.height;
+  const b = dims.width / dims.height;
+  if (Math.abs(a - b) / a > 0.01) return null;
+  const s = cal.imageDims.width / dims.width;
+  return { ...cal, k: cal.k * s, refPx: cal.refPx / s, imageDims: { ...dims } };
+}
+
 /** Map a client (screen) point to image pixels through an <svg viewBox>. */
 export function screenToImage(svg: SVGSVGElement, clientX: number, clientY: number): Pt | null {
   const ctm = svg.getScreenCTM();

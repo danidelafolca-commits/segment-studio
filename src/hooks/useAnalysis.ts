@@ -3,7 +3,7 @@
 import { useDeferredValue, useMemo, useState } from "react";
 import { cleanDetections, type AnalyzeResult, type Detection, type ImageDims } from "@/lib/roboflow";
 import { computeMetrics, classifyShape, DEFAULT_SHAPE_RULES, type Metrics, type ShapeClass } from "@/lib/morphometry";
-import { isValidFor, type Calibration } from "@/lib/calibration";
+import { adaptTo, loadDefaultCalibration, type Calibration } from "@/lib/calibration";
 import { prMetrics, type Label } from "@/lib/stats";
 
 export interface Filters {
@@ -39,7 +39,7 @@ function rescale(dets: Detection[], model: ImageDims | null, natural: ImageDims 
 
 export function useAnalysis(result: AnalyzeResult | null, natural: ImageDims | null) {
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
-  const [calibration, setCalibration] = useState<Calibration | null>(null);
+  const [calibration, setCalibration] = useState<Calibration | null>(() => loadDefaultCalibration());
   const [labels, setLabels] = useState<Record<string, Label | undefined>>({});
   const [misses, setMisses] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -54,7 +54,7 @@ export function useAnalysis(result: AnalyzeResult | null, natural: ImageDims | n
   }
 
   const dims = natural ?? result?.image ?? null;
-  const activeCal = calibration && dims && isValidFor(calibration, dims) ? calibration : null;
+  const activeCal = calibration && dims ? adaptTo(calibration, dims) : null;
   const k = activeCal?.k ?? 1;
 
   const scaleMismatch = !!(result?.image && natural &&
