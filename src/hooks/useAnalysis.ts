@@ -16,7 +16,8 @@ export interface Filters {
   hiddenClasses: string[];
 }
 
-export const DEFAULT_FILTERS: Filters = { tau: 0.4, minAreaPx: 20, excludeBorder: false, hiddenClasses: [] };
+// tau = 0 mirrors the Roboflow dashboard: the workflow already applies its own confidence floor (~0.05).
+export const DEFAULT_FILTERS: Filters = { tau: 0, minAreaPx: 20, excludeBorder: false, hiddenClasses: [] };
 
 export interface Row {
   det: Detection;

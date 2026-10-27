@@ -183,7 +183,7 @@ export interface CleanOptions {
   dedupIou: number;
 }
 
-export const DEFAULT_CLEAN: CleanOptions = { maxImageFraction: 0.05, dedupIou: 0.5 };
+export const DEFAULT_CLEAN: CleanOptions = { maxImageFraction: 0.5, dedupIou: 0.5 };
 
 function bboxIou(a: Detection["bbox"], b: Detection["bbox"]): number {
   const ix = Math.max(0, Math.min(a[0] + a[2], b[0] + b[2]) - Math.max(a[0], b[0]));

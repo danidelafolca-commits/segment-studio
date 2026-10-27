@@ -117,7 +117,6 @@ export async function POST(request: Request) {
 
   const output = Array.isArray(roboflowData.outputs) ? roboflowData.outputs[0] ?? {} : {};
   const sam3 = output["sam_3_output"] ?? null;
-
   const detections = normalizeDetections(sam3);
   const rawCount = output["box_count"];
   // Single source of truth: detections. `box_count` is only a fallback.

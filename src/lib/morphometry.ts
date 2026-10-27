@@ -82,9 +82,16 @@ export function computeMetrics(
   dims?: { width: number; height: number } | null
 ): Metrics {
   const pts = det.points;
-  if (pts.length < 3) return { ...EMPTY, nVertices: pts.length };
+  // Box-only detections still need an area / border flag for the client filters.
+  const boxOnly = (): Metrics => ({
+    ...EMPTY,
+    nVertices: pts.length,
+    areaPx: det.bbox[2] * det.bbox[3],
+    touchesBorder: dims ? touchesBorder(det.bbox, dims) : false,
+  });
+  if (pts.length < 3) return boxOnly();
   const areaPx = polygonArea(pts);
-  if (areaPx <= 0) return { ...EMPTY, nVertices: pts.length };
+  if (areaPx <= 0) return boxOnly();
 
   const perimPx = polygonPerimeter(pts);
   const hull = convexHull(pts);
