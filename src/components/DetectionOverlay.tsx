@@ -30,6 +30,8 @@ interface Props {
   markers?: Point[];
   /** Draw the line/circle defined by the markers. */
   markerShape?: 'line' | 'circle' | null;
+  /** Per-detection reveal delay (ms) while the sonar sweep plays. */
+  revealDelays?: Map<string, number> | null;
 }
 
 /** SVG layer with viewBox = image pixels. preserveAspectRatio="meet" gives the
@@ -44,6 +46,7 @@ export default function DetectionOverlay({
   onPick,
   markers = [],
   markerShape = null,
+  revealDelays = null,
 }: Props) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const unit = Math.max(dims.width, dims.height) / 400; // marker size in image px
@@ -71,6 +74,7 @@ export default function DetectionOverlay({
         const color = classColor(det.cls);
         const label = labels[det.id];
         const stroke = label === 'fp' ? '#dc2626' : color;
+        const delay = revealDelays?.get(det.id);
         const common = {
           fill: color,
           fillOpacity: selected ? 0.35 : 0.15,
@@ -78,7 +82,10 @@ export default function DetectionOverlay({
           strokeWidth: selected ? 3 : 1.5,
           vectorEffect: 'non-scaling-stroke' as const,
           strokeDasharray: label === 'fp' ? '4 3' : undefined,
-          style: { cursor: picking ? 'crosshair' : 'pointer' },
+          style: {
+            cursor: picking ? 'crosshair' : 'pointer',
+            animation: delay !== undefined ? `sonar-reveal 700ms ease-out ${delay}ms both` : undefined,
+          },
           onClick: (e: MouseEvent) => {
             if (picking) return;
             e.stopPropagation();

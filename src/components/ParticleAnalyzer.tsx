@@ -15,6 +15,8 @@ import { AnalyzeError, MAX_FILE_BYTES, analyzeFile, imageDims } from '@/lib/anal
 import { useAnalysis } from '@/hooks/useAnalysis';
 import { DEFAULT_SHAPE_RULES } from '@/lib/morphometry';
 import DetectionOverlay from '@/components/DetectionOverlay';
+import { SWEEP_MS, SonarCount, SonarSweep, rowCenterX, sweepProgressAt } from '@/components/SonarSweep';
+import { useReducedMotionSafe } from '@/components/motion/useReducedMotionSafe';
 import CalibrationTool, { type CalMode } from '@/components/CalibrationTool';
 import ThresholdPanel from '@/components/ThresholdPanel';
 import BlankControlPanel, { type BlankSummary } from '@/components/BlankControlPanel';
@@ -83,6 +85,8 @@ export default function ParticleAnalyzer() {
   const [blank, setBlank] = useState<BlankSummary | null>(null);
   const [analysisId, setAnalysisId] = useState('');
   const [annotatedUrl, setAnnotatedUrl] = useState<string | null>(null);
+  const [sweepId, setSweepId] = useState<string | null>(null);
+  const reducedMotion = useReducedMotionSafe();
 
   // Natural pixel size of the uploaded image (what all measurements refer to).
   // Keyed by file so a stale value is never used for a newer image.
@@ -198,7 +202,9 @@ export default function ParticleAnalyzer() {
     try {
       const data = await analyzeFile(file, ctrl.signal);
       if (ctrl.signal.aborted) return;
-      setAnalysisId(newId());
+      const id = newId();
+      setAnalysisId(id);
+      setSweepId(reducedMotion ? null : id);
       setAnnotated(data.annotatedImage ? URL.createObjectURL(base64ToBlob(data.annotatedImage)) : null);
       setResult(data);
     } catch (err) {
@@ -237,6 +243,21 @@ export default function ParticleAnalyzer() {
   const hasGeometry = a.rows.length > 0 && !!a.dims;
   const picking = calMode !== null && calPoints.length < (calMode === 'circle' ? 3 : 2);
   const onPick = useCallback((p: Point) => setCalPoints((prev) => [...prev, p]), []);
+
+  const sweeping = hasGeometry && sweepId !== null && sweepId === analysisId;
+  const onSweepDone = useCallback(() => setSweepId(null), []);
+  const sweepWidth = a.dims?.width ?? 1;
+  const revealDelays = useMemo(
+    () =>
+      sweeping
+        ? new Map(a.visible.map((r) => [r.det.id, sweepProgressAt(rowCenterX(r), sweepWidth) * SWEEP_MS]))
+        : null,
+    [sweeping, a.visible, sweepWidth]
+  );
+  const sweepPoints = useMemo(
+    () => (sweeping ? a.visible.map((r) => sweepProgressAt(rowCenterX(r), sweepWidth)) : []),
+    [sweeping, a.visible, sweepWidth]
+  );
 
   const getExportInput = () => {
     return {
@@ -429,7 +450,11 @@ export default function ParticleAnalyzer() {
                           onPick={onPick}
                           markers={calPoints}
                           markerShape={calMode}
+                          revealDelays={revealDelays}
                         />
+                        {sweeping && (
+                          <SonarSweep key={analysisId} dims={a.dims} rows={a.visible} onDone={onSweepDone} />
+                        )}
                       </>
                     ) : annotatedUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -452,7 +477,13 @@ export default function ParticleAnalyzer() {
                   </div>
                   <div className="text-right">
                     <span className="font-display text-6xl font-[350] tabular-nums tracking-tight text-paper">
-                      {hasGeometry ? a.visible.length : result.boxCount}
+                      {sweeping ? (
+                        <SonarCount key={analysisId} progressPoints={sweepPoints} total={a.visible.length} />
+                      ) : hasGeometry ? (
+                        a.visible.length
+                      ) : (
+                        result.boxCount
+                      )}
                     </span>
                     {hasGeometry && (
                       <p className="font-mono text-[11px] text-paper/55">
