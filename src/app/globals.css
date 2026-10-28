@@ -1,100 +1,230 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Brand palette (Partikel) ─────────────────────────────────────────
-     Primary #003366 · Secondary #008080 · Tertiary #E0FFFF · Neutral #F0F8FF
-     Mapped to a "lab precision" dark navy theme. Swap here to re-theme. */
+  /* ── Partikel · "Papel y tinta de laboratorio" ─────────────────────────
+     Warm ivory paper, Prussian ink, a lab teal and an ochre counterpoint. */
 
-  /* Navy surfaces (darkest → lightest) */
-  --color-ocean-night: #00111f; /* page background */
-  --color-ocean-deep: #021a30; /* cards / panels */
-  --color-ocean-mid: #042a4c; /* elevated / hover */
-  --color-ocean-lt: #003366; /* Primary */
-  --color-ocean-surf: #00527e;
+  /* Paper surfaces (lightest → deepest) */
+  --color-paper-lift: #fbf8f2; /* cards */
+  --color-paper: #f3eee4; /* page background */
+  --color-paper-deep: #e9e2d3; /* recessed / alternating sections */
+  --color-paper-shade: #dcd3c0;
 
-  /* Light text & tints */
-  --color-ice-white: #f0f8ff; /* Neutral — primary text */
-  --color-ice-2: #e0ffff; /* Tertiary */
-  --color-ice-blue: #aacbe0; /* secondary text */
-  --color-ice-mid: #7ea9c2;
-  --color-ice-shad: #4f7b92;
-  --color-ice-dark: #34566a;
+  /* Ink */
+  --color-ink: #16232f; /* primary text, dark sections */
+  --color-ink-2: #22313f;
+  --color-ink-soft: #46535f; /* secondary text */
+  --color-ink-mute: #7a8590;
 
-  /* Single accent — teal (Secondary, brightened for dark AA) + cyan tint */
-  --color-accent: #15b8b8;
-  --color-accent-bright: #2fd4d4;
-  --color-accent-deep: #008080;
+  /* Accents */
+  --color-teal: #2e6e68;
+  --color-teal-bright: #3d8a82;
+  --color-teal-deep: #22524d;
+  --color-ochre: #b4582f;
+  --color-ochre-soft: #d98a5f;
+  --color-warn: #9a5a12;
 
-  /* Back-compat aliases (used across components) */
-  --color-aurora-teal: #15b8b8;
-  --color-aurora-cyan: #2fd4d4;
-  --color-aurora-blue: #1f5c99;
+  /* ── Back-compat aliases: the original dark-theme names now resolve to the
+     editorial palette, so every component re-themes from this one place. */
+  --color-ocean-night: var(--color-paper);
+  --color-ocean-deep: var(--color-paper-lift);
+  --color-ocean-mid: var(--color-paper-deep);
+  --color-ocean-lt: var(--color-paper-shade);
+  --color-ocean-surf: var(--color-paper-shade);
+
+  --color-ice-white: var(--color-ink);
+  --color-ice-2: var(--color-ink-2);
+  --color-ice-blue: var(--color-ink-soft);
+  --color-ice-mid: var(--color-ink-soft);
+  --color-ice-shad: var(--color-ink-mute);
+  --color-ice-dark: var(--color-ink-mute);
+
+  --color-accent: var(--color-teal);
+  --color-accent-bright: var(--color-teal-bright);
+  --color-accent-deep: var(--color-teal-deep);
+
+  --color-aurora-teal: var(--color-teal);
+  --color-aurora-cyan: var(--color-teal-bright);
+  --color-aurora-blue: var(--color-ink-2);
 
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-poppins);
+  --font-display: var(--font-fraunces);
+
+  --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-curtain: cubic-bezier(0.76, 0, 0.24, 1);
 }
 
 :root {
-  color-scheme: dark;
-  --grid-line: rgba(120, 170, 200, 0.05);
-  --hairline: rgba(168, 203, 224, 0.1);
+  color-scheme: light;
+  --hairline: rgba(22, 35, 47, 0.13);
+  --hairline-strong: rgba(22, 35, 47, 0.28);
+  --hairline-light: rgba(243, 238, 228, 0.16);
 }
 
 html {
-  scroll-behavior: smooth;
-  scroll-padding-top: 5rem;
+  scroll-padding-top: 6rem;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
 }
 
 body {
-  background-color: var(--color-ocean-night);
-  color: var(--color-ice-white);
+  background-color: var(--color-paper);
+  color: var(--color-ink);
   font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "cv11";
 }
 
-h1, h2, h3 {
-  font-family: var(--font-poppins), var(--font-inter), sans-serif;
-  letter-spacing: -0.02em;
+h1,
+h2,
+h3 {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  font-optical-sizing: auto;
 }
 
 ::selection {
-  background: var(--color-accent);
-  color: #00111f;
+  background: var(--color-ochre);
+  color: var(--color-paper);
 }
 
-/* ── Lab textures & elevation (as @utility so variants like hover: work) ── */
-
-/* Faint technical grid, fading toward the edges */
-@utility bg-grid {
-  background-image:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 44px 44px;
-  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 40%, transparent 100%);
-  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 40%, transparent 100%);
+:focus-visible {
+  outline: 2px solid var(--color-ochre);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
-/* Tinted elevation */
+/* ── Editorial utilities ─────────────────────────────────────────────── */
+
+/* Italic display accent ("lo *invisible*") */
+@utility serif-italic {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-style: italic;
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+}
+
+/* Small-caps index labels: "(01) — Análisis" */
+@utility eyebrow {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+/* Line mask for text reveals */
+@utility mask-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+/* Animated underline for text links */
+@utility link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 100% 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.7s var(--ease-editorial);
+  &:hover,
+  &:focus-visible {
+    background-size: 100% 1px;
+    background-position: 0% 100%;
+  }
+}
+
+/* Soft paper elevation */
 @utility shadow-lab {
   box-shadow:
-    inset 0 1px 0 0 rgba(168, 203, 224, 0.06),
-    0 24px 50px -28px rgba(0, 18, 32, 0.9);
+    0 1px 0 0 rgba(255, 255, 255, 0.7) inset,
+    0 30px 60px -40px rgba(22, 35, 47, 0.35);
 }
 
 @utility shadow-glow {
-  box-shadow: 0 0 0 1px rgba(21, 184, 184, 0.35), 0 0 60px -18px rgba(21, 184, 184, 0.5);
+  box-shadow: 0 0 0 1px rgba(46, 110, 104, 0.45), 0 20px 50px -24px rgba(46, 110, 104, 0.45);
+}
+
+/* Faint ruled grid (graph paper) */
+@utility bg-grid {
+  background-image:
+    linear-gradient(var(--hairline) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hairline) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 100%);
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 100%);
+}
+
+/* Paper grain overlay */
+.grain {
+  pointer-events: none;
+  position: fixed;
+  inset: -50%;
+  z-index: 60;
+  opacity: 0.07;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.09 0 0 0 0 0.14 0 0 0 0 0.18 0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: grain 9s steps(10) infinite;
+}
+
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-3%, -4%); }
+  30% { transform: translate(4%, -2%); }
+  50% { transform: translate(-2%, 5%); }
+  70% { transform: translate(5%, 2%); }
+  90% { transform: translate(-4%, 3%); }
+}
+
+/* No-JS safety net: never let the intro curtain block the page. */
+.intro-curtain {
+  animation: curtain-fallback 0s 6s forwards;
+}
+@keyframes curtain-fallback {
+  to { visibility: hidden; }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes scroll-cue {
+  0% { transform: scaleY(0); transform-origin: top; }
+  45% { transform: scaleY(1); transform-origin: top; }
+  55% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+@utility animate-marquee {
+  animation: marquee 38s linear infinite;
+}
+
+@utility animate-scroll-cue {
+  animation: scroll-cue 2.4s var(--ease-curtain) infinite;
+}
+
+input[type="range"] {
+  accent-color: var(--color-teal);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }

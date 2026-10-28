@@ -60,7 +60,7 @@ export default function CalibrationTool({ dims, calibration, onCalibration, mode
   const shortRef = calibration && calibration.refPx < MIN_REF_PX;
 
   return (
-    <div className="rounded-2xl border border-[var(--hairline)] bg-ocean-deep/40 p-5">
+    <div className="rounded-2xl border border-[var(--hairline)] bg-paper-lift p-5">
       <p className="mb-3 font-mono text-xs uppercase tracking-widest text-ice-blue/50">{t('cal.title')}</p>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -123,7 +123,7 @@ export default function CalibrationTool({ dims, calibration, onCalibration, mode
           <p>
             k = {calibration.k.toPrecision(5)} {calibration.unit}/px · ±{(calibration.relUncertainty * 100).toFixed(2)} %
           </p>
-          {shortRef && <p className="mt-1 text-[#f0a83c]">{t('cal.warn_short')}</p>}
+          {shortRef && <p className="mt-1 text-warn">{t('cal.warn_short')}</p>}
         </div>
       )}
       {!calibration && !mode && <p className="mt-3 text-xs text-ice-blue/45">{t('cal.none')}</p>}

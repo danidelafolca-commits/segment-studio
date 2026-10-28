@@ -35,12 +35,12 @@ export default function MorphometryTable({ a }: { a: AnalysisState }) {
   );
 
   return (
-    <div className="rounded-2xl border border-[var(--hairline)] bg-ocean-deep/40 p-5">
+    <div className="rounded-2xl border border-[var(--hairline)] bg-paper-lift p-5">
       <p className="mb-3 font-mono text-xs uppercase tracking-widest text-ice-blue/50">
         {t('morph.title')} <span className="text-ice-blue/35">({a.visible.length})</span>
       </p>
-      <div className="max-h-72 overflow-auto">
-        <table className="w-full font-mono text-[11px] text-ice-blue/80">
+      <div className="max-h-72 overflow-auto" data-lenis-prevent>
+        <table className="w-full font-mono text-[11px] text-ink-soft">
           <thead className="sticky top-0 bg-ocean-deep text-ice-blue/50">
             <tr>
               <th className="px-2 py-1.5 text-left font-medium">ID</th>
@@ -83,7 +83,7 @@ export default function MorphometryTable({ a }: { a: AnalysisState }) {
                     </button>
                     <button
                       onClick={() => a.setLabel(r.det.id, l === 'fp' ? undefined : 'fp')}
-                      className={`cursor-pointer rounded px-1.5 ${l === 'fp' ? 'bg-red-400 text-ocean-night' : 'border border-[var(--hairline)]'}`}
+                      className={`cursor-pointer rounded px-1.5 ${l === 'fp' ? 'bg-red-700 text-paper' : 'border border-[var(--hairline)]'}`}
                     >
                       FP
                     </button>

@@ -7,6 +7,7 @@ interface SeaHeroProps {
   className?: string;
   cameraZ?: number;
   planeSize?: number;
+  segments?: number;
   speed?: number;
 }
 
@@ -126,12 +127,12 @@ const fragmentShader = /* glsl */ `
   void main(void) {
     // Fade the far edge into the page background (horizon haze).
     float fog = clamp((vPosition.z + 90.0) / 210.0, 0.0, 1.0);
-    // Wave crests glow brighter / lighter than troughs.
+    // Engraving: ink troughs, lab-teal crests, drawn as fine lines on paper.
     float crest = clamp((vPosition.y + 9.0) / 22.0, 0.0, 1.0);
-    vec3 deep = vec3(0.012, 0.105, 0.205); // navy-teal trough
-    vec3 high = vec3(0.122, 0.776, 0.741); // teal/ice crest
-    vec3 color = mix(deep, high, crest);
-    float opacity = fog * (0.16 + crest * 0.6);
+    vec3 deep = vec3(0.086, 0.137, 0.184); // ink
+    vec3 high = vec3(0.180, 0.431, 0.408); // teal
+    vec3 color = mix(deep, high, smoothstep(0.35, 0.9, crest));
+    float opacity = fog * (0.08 + crest * 0.42);
     gl_FragColor = vec4(color, opacity);
   }
 `;
@@ -140,7 +141,8 @@ export default function SeaHero({
   className,
   cameraZ = 120,
   planeSize = 256,
-  speed = 0.5,
+  segments = 120,
+  speed = 0.35,
 }: SeaHeroProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -161,12 +163,14 @@ export default function SeaHero({
 
     const clock = new THREE.Clock();
     const uniforms = { time: { value: 0 } };
-    const geometry = new THREE.PlaneGeometry(planeSize, planeSize, planeSize, planeSize);
+    const geometry = new THREE.PlaneGeometry(planeSize, planeSize, segments, segments);
     const material = new THREE.RawShaderMaterial({
       uniforms,
       vertexShader,
       fragmentShader,
       transparent: true,
+      wireframe: true,
+      depthWrite: false,
     });
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
@@ -180,6 +184,8 @@ export default function SeaHero({
     };
     resize();
     window.addEventListener('resize', resize);
+    const onResizeStill = () => renderer.render(scene, camera);
+    window.addEventListener('resize', onResizeStill);
 
     // Pause the render loop while the hero is off-screen.
     let visible = true;
@@ -193,8 +199,14 @@ export default function SeaHero({
 
     let rafId = 0;
     let disposed = false;
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const loop = () => {
       if (disposed) return;
+      if (still) {
+        uniforms.time.value = 4;
+        renderer.render(scene, camera);
+        return;
+      }
       const delta = clock.getDelta();
       if (visible) {
         uniforms.time.value += delta * speed;
@@ -208,12 +220,13 @@ export default function SeaHero({
       disposed = true;
       cancelAnimationFrame(rafId);
       window.removeEventListener('resize', resize);
+      window.removeEventListener('resize', onResizeStill);
       io.disconnect();
       geometry.dispose();
       material.dispose();
       renderer.dispose();
     };
-  }, [cameraZ, planeSize, speed]);
+  }, [cameraZ, planeSize, segments, speed]);
 
   return (
     <div ref={containerRef} className={className} aria-hidden="true">

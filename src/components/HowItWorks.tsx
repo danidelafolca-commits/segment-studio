@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { useI18n } from '@/components/LanguageProvider';
-import { LetterSwapAppear } from '@/components/LetterSwap';
+import RevealText from '@/components/motion/RevealText';
 import ScrollReveal from '@/components/ScrollReveal';
 import SectionReveal from '@/components/SectionReveal';
 
@@ -12,7 +12,7 @@ const iconProps = {
   viewBox: '0 0 24 24',
   fill: 'none',
   stroke: 'currentColor',
-  strokeWidth: 1.8,
+  strokeWidth: 1.5,
   strokeLinecap: 'round' as const,
   strokeLinejoin: 'round' as const,
 };
@@ -46,42 +46,51 @@ export default function HowItWorks() {
   ];
 
   return (
-    <SectionReveal
-      id="how"
-      className="relative w-full scroll-mt-24 bg-ocean-deep/50 px-6 py-24 md:py-32"
-    >
-      <div className="relative mx-auto max-w-6xl">
-        <ScrollReveal className="mb-14 text-center">
-          <p className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-accent">
-            {t('how.eyebrow')}
-          </p>
-          <h2 className="font-display text-3xl font-bold tracking-tight text-ice-white md:text-4xl">
-            <LetterSwapAppear label={t('how.heading')} />
-          </h2>
-        </ScrollReveal>
-        <ol className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+    <SectionReveal id="how" className="relative w-full scroll-mt-24 bg-paper px-6 py-28 md:px-10 md:py-44">
+      <div className="mx-auto grid max-w-[100rem] gap-16 md:grid-cols-12">
+        <div className="md:col-span-5">
+          <div className="md:sticky md:top-32">
+            <p className="eyebrow mb-8 flex items-center gap-3 text-ink-mute">
+              <span className="text-ochre">(02)</span>
+              <span className="h-px w-8 bg-[var(--hairline-strong)]" />
+              {t('how.eyebrow')}
+            </p>
+            <RevealText
+              as="h2"
+              text={t('how.heading')}
+              className="font-display text-[clamp(2.8rem,6vw,6rem)] font-[350] leading-[0.95] tracking-[-0.035em] text-ink"
+              italicClassName="serif-italic text-teal"
+            />
+            <ScrollReveal order={1}>
+              <p className="mt-8 max-w-md text-[1.05rem] leading-relaxed text-ink-soft">{t('how.intro')}</p>
+            </ScrollReveal>
+          </div>
+        </div>
+
+        <ol className="md:col-span-7 md:col-start-6">
           {steps.map((s, i) => (
-            <li key={s.n} className="h-full">
-              <ScrollReveal order={i} className="h-full">
-                <div className="group flex h-full flex-col rounded-2xl border border-[var(--hairline)] bg-ocean-night/40 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-accent/40 hover:shadow-lab">
-                  <div className="mb-5 flex items-center justify-between">
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--hairline)] bg-ocean-deep text-accent transition-colors group-hover:bg-accent/10">
-                  {ICONS[i]}
-                </span>
-                <span className="font-mono text-xs tabular-nums text-ice-blue/35">
-                  {s.n}
-                </span>
-              </div>
-              <h3 className="font-display text-lg font-semibold text-ice-white">
-                <LetterSwapAppear label={s.title} staggerDuration={0.02} />
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-ice-blue/70">
-                {s.body}
-              </p>
+            <li key={s.n}>
+              <ScrollReveal order={i % 2}>
+                <div className="group relative grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 overflow-hidden border-t border-[var(--hairline-strong)] py-10 md:grid-cols-[7rem_1fr_auto] md:gap-x-10 md:py-14">
+                  <span
+                    className="pointer-events-none absolute inset-0 origin-bottom scale-y-0 bg-paper-deep transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-y-100"
+                    aria-hidden="true"
+                  />
+                  <span className="serif-italic relative font-display text-5xl leading-none text-ink-mute transition-colors duration-500 group-hover:text-teal md:text-7xl">
+                    {s.n}
+                  </span>
+                  <div className="relative transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:translate-x-3">
+                    <h3 className="font-display text-3xl tracking-tight text-ink md:text-[2.4rem] md:leading-tight">{s.title}</h3>
+                    <p className="mt-3 max-w-md leading-relaxed text-ink-soft">{s.body}</p>
+                  </div>
+                  <span className="relative hidden h-12 w-12 items-center justify-center rounded-full border border-[var(--hairline-strong)] text-ink-soft transition-all duration-500 group-hover:border-ink group-hover:bg-ink group-hover:text-paper md:flex">
+                    {ICONS[i]}
+                  </span>
                 </div>
               </ScrollReveal>
             </li>
           ))}
+          <li aria-hidden="true" className="border-t border-[var(--hairline-strong)]" />
         </ol>
       </div>
     </SectionReveal>

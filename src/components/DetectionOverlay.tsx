@@ -8,14 +8,14 @@ import { circumcircle } from '@/lib/geometry';
 import { screenToImage } from '@/lib/calibration';
 
 const CLASS_COLORS: Record<string, string> = {
-  particle: '#15b8b8',
-  fiber: '#2fd4d4',
-  fragment: '#f0a83c',
-  sphere: '#a78bfa',
+  particle: '#14918a',
+  fiber: '#2378c4',
+  fragment: '#e08a1e',
+  sphere: '#8b5cf6',
 };
 
 export function classColor(cls: string): string {
-  return CLASS_COLORS[cls] ?? '#aacbe0';
+  return CLASS_COLORS[cls] ?? '#46535f';
 }
 
 interface Props {
@@ -70,7 +70,7 @@ export default function DetectionOverlay({
         const selected = det.id === selectedId;
         const color = classColor(det.cls);
         const label = labels[det.id];
-        const stroke = label === 'fp' ? '#f87171' : color;
+        const stroke = label === 'fp' ? '#dc2626' : color;
         const common = {
           fill: color,
           fillOpacity: selected ? 0.35 : 0.15,
@@ -93,13 +93,13 @@ export default function DetectionOverlay({
       })}
 
       {markerShape === 'line' && markers.length === 2 && (
-        <line x1={markers[0].x} y1={markers[0].y} x2={markers[1].x} y2={markers[1].y} stroke="#f0f8ff" strokeWidth={2} vectorEffect="non-scaling-stroke" />
+        <line x1={markers[0].x} y1={markers[0].y} x2={markers[1].x} y2={markers[1].y} stroke="#b4582f" strokeWidth={2} vectorEffect="non-scaling-stroke" />
       )}
       {circle && (
-        <circle cx={circle.center.x} cy={circle.center.y} r={circle.radius} fill="none" stroke="#f0f8ff" strokeWidth={2} strokeDasharray="6 4" vectorEffect="non-scaling-stroke" />
+        <circle cx={circle.center.x} cy={circle.center.y} r={circle.radius} fill="none" stroke="#b4582f" strokeWidth={2} strokeDasharray="6 4" vectorEffect="non-scaling-stroke" />
       )}
       {markers.map((m, i) => (
-        <circle key={i} cx={m.x} cy={m.y} r={unit} fill="#f0f8ff" stroke="#00111f" strokeWidth={1} vectorEffect="non-scaling-stroke" />
+        <circle key={i} cx={m.x} cy={m.y} r={unit} fill="#fbf8f2" stroke="#16232f" strokeWidth={1} vectorEffect="non-scaling-stroke" />
       ))}
     </svg>
   );

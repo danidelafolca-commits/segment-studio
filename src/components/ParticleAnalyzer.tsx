@@ -21,17 +21,17 @@ import BlankControlPanel, { type BlankSummary } from '@/components/BlankControlP
 import MorphometryTable from '@/components/MorphometryTable';
 import ExportButton from '@/components/ExportButton';
 import { useI18n } from '@/components/LanguageProvider';
-import { LetterSwapAppear } from '@/components/LetterSwap';
+import RevealText from '@/components/motion/RevealText';
 import ScrollReveal from '@/components/ScrollReveal';
 import SectionReveal from '@/components/SectionReveal';
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png'];
 
 const KNOWN_CLASSES = [
-  { key: 'particle', dot: '#15b8b8' },
-  { key: 'fiber', dot: '#2fd4d4' },
-  { key: 'fragment', dot: '#f0a83c' },
-  { key: 'sphere', dot: '#a78bfa' },
+  { key: 'particle', dot: '#14918a' },
+  { key: 'fiber', dot: '#2378c4' },
+  { key: 'fragment', dot: '#e08a1e' },
+  { key: 'sphere', dot: '#8b5cf6' },
 ] as const;
 
 /** Decode base64 once into a Blob (avoids rebuilding a multi-MB data URL per render). */
@@ -59,7 +59,7 @@ function Spinner({ className = '' }: { className?: string }) {
 
 function FlowChip({ label }: { label: string }) {
   return (
-    <span className="rounded-md border border-[var(--hairline)] bg-ocean-night/60 px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wider text-ice-blue/55">
+    <span className="rounded-full border border-[var(--hairline-strong)] bg-paper px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-ink-soft">
       {label}
     </span>
   );
@@ -271,20 +271,27 @@ export default function ParticleAnalyzer() {
   return (
     <SectionReveal
       id="workspace"
-      className="relative w-full scroll-mt-24 bg-ocean-night/50 px-6 py-24 md:py-32"
+      className="relative w-full scroll-mt-24 bg-paper-deep px-6 py-28 md:px-10 md:py-40"
     >
-      <div className="relative mx-auto max-w-6xl">
-        <ScrollReveal className="mb-12 text-center">
-          <p className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-accent">
+      <div className="relative mx-auto max-w-[100rem]">
+        <div className="mb-16 grid gap-8 md:mb-24 md:grid-cols-12">
+          <p className="eyebrow flex items-center gap-3 text-ink-mute md:col-span-3">
+            <span className="text-ochre">(01)</span>
+            <span className="h-px w-8 bg-[var(--hairline-strong)]" />
             {t('ws.eyebrow')}
           </p>
-          <h2 className="font-display text-3xl font-bold tracking-tight text-ice-white md:text-4xl">
-            <LetterSwapAppear label={t('ws.heading')} />
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-ice-blue/80">
-            {t('ws.subtitle')}
-          </p>
-        </ScrollReveal>
+          <div className="md:col-span-9">
+            <RevealText
+              as="h2"
+              text={t('ws.heading')}
+              className="font-display text-[clamp(2.6rem,6.5vw,6.5rem)] font-[350] leading-[0.95] tracking-[-0.035em] text-ink"
+              italicClassName="serif-italic text-teal"
+            />
+            <ScrollReveal order={1}>
+              <p className="mt-8 max-w-2xl text-[1.05rem] leading-relaxed text-ink-soft">{t('ws.subtitle')}</p>
+            </ScrollReveal>
+          </div>
+        </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
           {/* ── Left: upload / preview ──────────────────────────────────── */}
@@ -300,10 +307,10 @@ export default function ParticleAnalyzer() {
                 onDragOver={onDragOver}
                 onDragEnter={onDragEnter}
                 onDragLeave={onDragLeave}
-                className={`group relative flex min-h-[340px] cursor-pointer flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed px-6 text-center outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-accent/50 ${
+                className={`group relative flex min-h-[380px] cursor-pointer flex-col items-center justify-center gap-5 rounded-[28px] border border-dashed px-6 text-center outline-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-2 focus-visible:ring-ochre/60 ${
                   isDragging
-                    ? 'scale-[1.01] border-accent bg-accent/10 shadow-glow'
-                    : 'border-ice-blue/20 bg-ocean-deep/40 hover:border-ice-blue/45 hover:bg-ocean-deep/60'
+                    ? 'scale-[1.01] border-teal bg-teal/10 shadow-glow'
+                    : 'border-ink/25 bg-paper-lift hover:border-ink/50 hover:shadow-lab'
                 }`}
               >
                 <input
@@ -314,10 +321,10 @@ export default function ParticleAnalyzer() {
                   className="hidden"
                 />
                 <span
-                  className={`flex h-20 w-20 items-center justify-center rounded-2xl border transition-colors ${
+                  className={`flex h-20 w-20 items-center justify-center rounded-full border transition-all duration-500 ${
                     isDragging
-                      ? 'border-accent/50 bg-accent/15 text-accent'
-                      : 'border-[var(--hairline)] bg-ocean-night/60 text-ice-blue group-hover:text-accent'
+                      ? 'border-teal/50 bg-teal/15 text-teal'
+                      : 'border-[var(--hairline-strong)] bg-paper text-ink-soft group-hover:-translate-y-1 group-hover:text-teal'
                   }`}
                 >
                   <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -327,12 +334,12 @@ export default function ParticleAnalyzer() {
                   </svg>
                 </span>
                 <div>
-                  <p className="font-display text-lg font-semibold text-ice-white">
+                  <p className="font-display text-3xl tracking-tight text-ink">
                     {isDragging ? t('ws.drop') : t('ws.drag')}
                   </p>
                   <p className="mt-1 text-sm text-ice-blue/65">
                     {t('ws.or')}{' '}
-                    <span className="font-medium text-accent underline-offset-4 group-hover:underline">
+                    <span className="serif-italic text-base text-teal underline decoration-teal/30 underline-offset-4 group-hover:decoration-teal">
                       {t('ws.browse')}
                     </span>
                   </p>
@@ -342,15 +349,15 @@ export default function ParticleAnalyzer() {
                 </p>
               </div>
             ) : (
-              <div className="overflow-hidden rounded-2xl border border-[var(--hairline)] bg-ocean-deep/40 shadow-lab">
-                <div className="relative aspect-video w-full bg-ocean-night">
+              <div className="overflow-hidden rounded-[28px] border border-[var(--hairline)] bg-paper-lift shadow-lab">
+                <div className="relative aspect-video w-full bg-paper-shade/50">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={previewUrl}
                     alt={file?.name ?? t('ws.original')}
                     className="h-full w-full object-contain"
                   />
-                  <span className="absolute left-3 top-3 rounded-full bg-ocean-night/80 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-ice-blue/80 backdrop-blur">
+                  <span className="absolute left-3 top-3 rounded-full bg-paper/85 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-ink-soft backdrop-blur">
                     {t('ws.original')}
                   </span>
                 </div>
@@ -367,7 +374,7 @@ export default function ParticleAnalyzer() {
                     <button
                       onClick={analyze}
                       disabled={loading}
-                      className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-[linear-gradient(110deg,#008080,#15b8b8)] px-6 py-2 text-sm font-semibold text-ocean-night shadow-[0_8px_26px_-10px_rgba(21,184,184,0.6)] transition-transform hover:scale-[1.03] active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
+                      className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-ink px-6 py-2 text-sm font-medium text-paper transition-all duration-500 hover:bg-teal active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
                     >
                       {loading ? (
                         <>
@@ -384,7 +391,7 @@ export default function ParticleAnalyzer() {
             )}
 
             {error && (
-              <div role="alert" className="flex items-start gap-3 rounded-xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+              <div role="alert" className="flex items-start gap-3 rounded-2xl border border-red-700/25 bg-red-700/[0.06] px-4 py-3 text-sm text-red-800">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 shrink-0">
                   <circle cx="12" cy="12" r="10" />
                   <path d="M12 8v5M12 16h.01" strokeLinecap="round" />
@@ -393,21 +400,21 @@ export default function ParticleAnalyzer() {
               </div>
             )}
 
-            <p className="text-center font-mono text-xs text-ice-blue/35">{t('ws.local_note')}</p>
+            <p className="text-center font-mono text-[11px] leading-relaxed text-ink-mute">{t('ws.local_note')}</p>
           </ScrollReveal>
 
           {/* ── Right: results ──────────────────────────────────────────── */}
           <ScrollReveal className="flex flex-col" order={1}>
             {loading ? (
-              <div className="flex min-h-[340px] flex-1 flex-col items-center justify-center gap-4 rounded-2xl border border-[var(--hairline)] bg-ocean-deep/40 text-center shadow-lab">
-                <Spinner className="h-9 w-9 text-accent" />
-                <p className="font-display text-ice-white">{t('ws.analyzing_full')}</p>
+              <div className="flex min-h-[380px] flex-1 flex-col items-center justify-center gap-4 rounded-[28px] border border-[var(--hairline)] bg-paper-lift text-center shadow-lab">
+                <Spinner className="h-9 w-9 text-teal" />
+                <p className="font-display text-2xl tracking-tight text-ink">{t('ws.analyzing_full')}</p>
                 <p className="font-mono text-xs text-ice-blue/45">{t('ws.running')}</p>
               </div>
             ) : result ? (
               <div className="flex flex-col gap-4">
-                <div className="overflow-hidden rounded-2xl border border-[var(--hairline)] bg-ocean-deep/40 shadow-lab">
-                  <div className="relative aspect-video w-full bg-ocean-night">
+                <div className="overflow-hidden rounded-[28px] border border-[var(--hairline)] bg-paper-lift shadow-lab">
+                  <div className="relative aspect-video w-full bg-paper-shade/50">
                     {hasGeometry && previewUrl && a.dims ? (
                       <>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -432,42 +439,42 @@ export default function ParticleAnalyzer() {
                         {t('ws.no_annotated')}
                       </div>
                     )}
-                    <span className="absolute left-3 top-3 rounded-full bg-ocean-night/80 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-accent backdrop-blur">
+                    <span className="absolute left-3 top-3 rounded-full bg-paper/85 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-teal backdrop-blur">
                       {t('ws.annotated')}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between rounded-2xl border border-accent/25 bg-accent/[0.08] px-6 py-5">
+                <div className="flex items-center justify-between rounded-[28px] bg-ink px-7 py-6 text-paper">
                   <div>
-                    <p className="font-mono text-xs uppercase tracking-widest text-ice-blue/55">{t('ws.detections')}</p>
-                    <p className="text-sm text-ice-white">{t('ws.particles_detected')}</p>
+                    <p className="eyebrow text-paper/55">{t('ws.detections')}</p>
+                    <p className="mt-1 font-display text-lg italic text-paper/90">{t('ws.particles_detected')}</p>
                   </div>
                   <div className="text-right">
-                    <span className="font-display text-5xl font-bold tabular-nums text-accent">
+                    <span className="font-display text-6xl font-[350] tabular-nums tracking-tight text-paper">
                       {hasGeometry ? a.visible.length : result.boxCount}
                     </span>
                     {hasGeometry && (
-                      <p className="font-mono text-[11px] text-ice-blue/50">
+                      <p className="font-mono text-[11px] text-paper/55">
                         {t('ws.shown')} / {a.rows.length}
                       </p>
                     )}
                   </div>
                 </div>
 
-                {hasGeometry && <p className="font-mono text-[11px] text-ice-blue/40">{t('ws.overlay_note')}</p>}
-                {a.scaleMismatch && <p className="font-mono text-[11px] text-[#f0a83c]">{t('ws.scale_warn')}</p>}
+                {hasGeometry && <p className="font-mono text-[11px] text-ink-mute">{t('ws.overlay_note')}</p>}
+                {a.scaleMismatch && <p className="font-mono text-[11px] text-warn">{t('ws.scale_warn')}</p>}
 
-                <div className="rounded-2xl border border-[var(--hairline)] bg-ocean-deep/40 p-5">
+                <div className="rounded-2xl border border-[var(--hairline)] bg-paper-lift p-5">
                   <p className="mb-4 font-mono text-xs uppercase tracking-widest text-ice-blue/50">{t('ws.breakdown')}</p>
                   <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {KNOWN_CLASSES.map(({ key, dot }) => (
-                      <li key={key} className="flex flex-col items-center gap-1 rounded-xl border border-[var(--hairline)] bg-ocean-night/50 py-4">
+                      <li key={key} className="flex flex-col items-center gap-1 rounded-xl border border-[var(--hairline)] bg-paper py-4">
                         <span className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-ice-blue/70">
                           <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: dot }} />
                           {t(`class.${key}`)}
                         </span>
-                        <span className="font-display text-2xl font-bold tabular-nums text-ice-white">
+                        <span className="font-display text-3xl tabular-nums text-ink">
                           {(hasGeometry ? a.counts.byClass : result.classCounts)[key] ?? 0}
                         </span>
                       </li>
@@ -487,7 +494,7 @@ export default function ParticleAnalyzer() {
                 </div>
 
                 {result.message && (
-                  <div className="rounded-2xl border border-[var(--hairline)] bg-ocean-deep/40 p-5">
+                  <div className="rounded-2xl border border-[var(--hairline)] bg-paper-lift p-5">
                     <p className="mb-2 font-mono text-xs uppercase tracking-widest text-ice-blue/50">{t('ws.summary')}</p>
                     <p className="text-sm leading-relaxed text-ice-blue/90">{result.message}</p>
                   </div>
@@ -512,16 +519,17 @@ export default function ParticleAnalyzer() {
                 )}
               </div>
             ) : (
-              <div className="flex min-h-[340px] flex-1 flex-col items-center justify-center gap-5 rounded-2xl border border-dashed border-ice-blue/15 bg-ocean-deep/20 px-6 text-center">
-                <div className="flex items-center gap-2">
+              <div className="relative flex min-h-[380px] flex-1 flex-col items-center justify-center gap-5 overflow-hidden rounded-[28px] border border-[var(--hairline)] bg-paper/60 px-6 text-center">
+                <div className="bg-grid pointer-events-none absolute inset-0" aria-hidden="true" />
+                <div className="relative flex items-center gap-2">
                   <FlowChip label={t('ws.flow_image')} />
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ice-blue/30"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
                   <FlowChip label={t('ws.flow_detect')} />
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ice-blue/30"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
                   <FlowChip label={t('ws.flow_count')} />
                 </div>
-                <p className="text-ice-blue/60">{t('ws.empty_title')}</p>
-                <p className="font-mono text-xs text-ice-blue/40">{t('ws.empty_sub')}</p>
+                <p className="relative max-w-xs font-display text-2xl leading-snug tracking-tight text-ink">{t('ws.empty_title')}</p>
+                <p className="relative font-mono text-xs text-ink-mute">{t('ws.empty_sub')}</p>
               </div>
             )}
           </ScrollReveal>

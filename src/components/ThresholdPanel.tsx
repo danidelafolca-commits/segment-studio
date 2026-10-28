@@ -16,12 +16,12 @@ function MiniChart({ values, tau, kind }: { values: number[]; tau: number; kind:
     <svg viewBox={`0 0 ${W} ${H}`} className="h-14 w-full" aria-hidden="true">
       {kind === 'bars' ? (
         values.map((v, i) => (
-          <rect key={i} x={x(i) + 0.5} y={y(v)} width={W / n - 1} height={H - 3 - y(v)} fill="#15b8b8" fillOpacity={0.55} />
+          <rect key={i} x={x(i) + 0.5} y={y(v)} width={W / n - 1} height={H - 3 - y(v)} fill="#2e6e68" fillOpacity={0.55} />
         ))
       ) : (
-        <polyline fill="none" stroke="#15b8b8" strokeWidth={1.5} points={values.map((v, i) => `${x(i)},${y(v)}`).join(' ')} />
+        <polyline fill="none" stroke="#2e6e68" strokeWidth={1.5} points={values.map((v, i) => `${x(i)},${y(v)}`).join(' ')} />
       )}
-      <line x1={tau * W} x2={tau * W} y1={0} y2={H} stroke="#f0f8ff" strokeOpacity={0.6} strokeDasharray="3 3" />
+      <line x1={tau * W} x2={tau * W} y1={0} y2={H} stroke="#b4582f" strokeOpacity={0.8} strokeDasharray="3 3" />
     </svg>
   );
 }
@@ -42,7 +42,7 @@ export default function ThresholdPanel({ a, locked = false }: { a: AnalysisState
   const fmt = (v: number | null) => (v === null ? '—' : v.toFixed(3));
 
   return (
-    <div className="rounded-2xl border border-[var(--hairline)] bg-ocean-deep/40 p-5">
+    <div className="rounded-2xl border border-[var(--hairline)] bg-paper-lift p-5">
       <p className="mb-4 font-mono text-xs uppercase tracking-widest text-ice-blue/50">{t('thr.title')}</p>
 
       <label className="flex items-center justify-between font-mono text-xs text-ice-blue/70">
@@ -57,7 +57,7 @@ export default function ThresholdPanel({ a, locked = false }: { a: AnalysisState
         value={filters.tau}
         disabled={locked}
         onChange={(e) => setFilters((f) => ({ ...f, tau: parseFloat(e.target.value) }))}
-        className="mb-4 w-full accent-[#15b8b8]"
+        className="mb-4 w-full accent-[#2e6e68]"
       />
 
       <div className="mb-4 grid gap-4 sm:grid-cols-2">
@@ -89,7 +89,7 @@ export default function ThresholdPanel({ a, locked = false }: { a: AnalysisState
             checked={filters.excludeBorder}
             disabled={locked}
             onChange={(e) => setFilters((f) => ({ ...f, excludeBorder: e.target.checked }))}
-            className="accent-[#15b8b8]"
+            className="accent-[#2e6e68]"
           />
           {t('thr.exclude_border')}
         </label>

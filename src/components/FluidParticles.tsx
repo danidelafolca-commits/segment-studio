@@ -79,15 +79,15 @@ function createNoise() {
   };
 }
 
-// Partikel palette — teal / cyan / ice on navy (weighted toward the accent).
+// Ink on paper — Prussian ink, lab teal and a rare ochre fleck.
 const PARTICLE_COLORS: [number, number, number][] = [
-  [21, 184, 184], // accent teal
-  [21, 184, 184],
-  [47, 212, 212], // cyan
-  [170, 203, 224], // ice blue
-  [224, 255, 255], // tertiary
+  [22, 35, 47], // ink
+  [22, 35, 47],
+  [46, 110, 104], // teal
+  [46, 110, 104],
+  [180, 88, 47], // ochre
 ];
-const TRAIL = 'rgba(0, 17, 31, 0.14)'; // ocean-night, low alpha → motion trails
+const TRAIL = 'rgba(243, 238, 228, 0.16)'; // paper, low alpha → motion trails
 
 interface P {
   x: number;
@@ -102,9 +102,9 @@ interface P {
 
 export default function FluidParticles({
   className = '',
-  particleCount = 900,
-  noiseIntensity = 0.0025,
-  particleSize = { min: 0.4, max: 1.8 },
+  particleCount = 520,
+  noiseIntensity = 0.0022,
+  particleSize = { min: 0.35, max: 1.3 },
 }: FluidParticlesProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 

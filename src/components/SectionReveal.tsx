@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
+import { cubicBezier, motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 
 interface SectionRevealProps {
   children: ReactNode;
@@ -11,9 +11,9 @@ interface SectionRevealProps {
 }
 
 /**
- * Scroll-driven mask: the section is wiped in (clip-path opens bottom→top) as it
- * enters the viewport, so seams between sections become a clean transition
- * instead of a hard line. Only mounted client-side once hydrated (SSR-safe).
+ * Scroll-driven mask: the section opens from an inset rounded "page" to full
+ * bleed as it enters the viewport, so seams between sections read as a turn of
+ * the page. Only mounted client-side once hydrated (SSR-safe).
  */
 function SectionRevealInner({
   children,
@@ -34,7 +34,8 @@ function SectionRevealInner({
   const clipPath = useTransform(
     scrollYProgress,
     [0, 1],
-    ['inset(100% 0% 0% 0%)', 'inset(0% 0% 0% 0%)']
+    ['inset(6% 3.5% 0% 3.5% round 40px)', 'inset(0% 0% 0% 0% round 0px)'],
+    { ease: cubicBezier(0.16, 1, 0.3, 1) }
   );
   const style = { clipPath, willChange: 'clip-path' } as const;
 

@@ -83,7 +83,7 @@ export default function BlankControlPanel({ a, onSummary }: Props) {
   const f = (v: number) => v.toFixed(3);
 
   return (
-    <div className="rounded-2xl border border-[var(--hairline)] bg-ocean-deep/40 p-5">
+    <div className="rounded-2xl border border-[var(--hairline)] bg-paper-lift p-5">
       <p className="mb-3 font-mono text-xs uppercase tracking-widest text-ice-blue/50">{t('blank.title')}</p>
       <input ref={inputRef} type="file" accept="image/jpeg,image/png" multiple onChange={onFiles} className="hidden" />
       <div className="flex flex-wrap items-center gap-2">
@@ -103,8 +103,8 @@ export default function BlankControlPanel({ a, onSummary }: Props) {
           </button>
         )}
       </div>
-      {err && <p className="mt-2 text-sm text-red-300">{err}</p>}
-      {!calibration && <p className="mt-3 text-xs text-[#f0a83c]">{t('blank.need_cal')}</p>}
+      {err && <p className="mt-2 text-sm text-red-700">{err}</p>}
+      {!calibration && <p className="mt-3 text-xs text-warn">{t('blank.need_cal')}</p>}
 
       {summary && (
         <div className="mt-4 font-mono text-xs text-ice-blue/80">

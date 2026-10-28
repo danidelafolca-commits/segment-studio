@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
+import { cubicBezier, motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 
 interface ScrollRevealProps {
   children: ReactNode;
@@ -38,8 +38,9 @@ function ScrollRevealMotion({
   });
 
   const begin = Math.min(order * 0.1, 0.45);
-  const opacity = useTransform(scrollYProgress, [begin, begin + 0.55], [0, 1]);
-  const translateY = useTransform(scrollYProgress, [begin, begin + 0.55], [y, 0]);
+  const ease = cubicBezier(0.16, 1, 0.3, 1);
+  const opacity = useTransform(scrollYProgress, [begin, begin + 0.5], [0, 1], { ease });
+  const translateY = useTransform(scrollYProgress, [begin, begin + 0.6], [y, 0], { ease });
 
   return (
     <motion.div
@@ -62,7 +63,7 @@ function ScrollRevealMotion({
 export default function ScrollReveal({
   children,
   className,
-  y = 36,
+  y = 56,
   order = 0,
   id,
 }: ScrollRevealProps) {

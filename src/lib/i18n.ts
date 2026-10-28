@@ -14,7 +14,7 @@ type Dict = Record<string, string>;
 export const translations: Record<Lang, Dict> = {
   es: {
     "nav.workspace": "Análisis",
-    "nav.how": "Cómo funciona",
+    "nav.how": "Método",
     "nav.cta": "Abrir análisis",
 
     "hero.eyebrow": "Roboflow × SAM3",
@@ -26,7 +26,7 @@ export const translations: Record<Lang, Dict> = {
     "hero.cta": "Abrir el análisis",
 
     "ws.eyebrow": "Análisis",
-    "ws.heading": "Analiza partículas con SAM3",
+    "ws.heading": "El *laboratorio,* en el navegador",
     "ws.subtitle":
       "Sube una imagen microscópica y detecta partículas, fibras y fragmentos. El procesamiento corre en el servidor con tu workflow de Roboflow — tu clave nunca llega al navegador.",
     "ws.drag": "Arrastra una imagen aquí",
@@ -66,8 +66,8 @@ export const translations: Record<Lang, Dict> = {
     "err.analyze": "No se pudo analizar la imagen.",
     "err.unexpected": "Error inesperado.",
 
-    "how.eyebrow": "Cómo funciona",
-    "how.heading": "De la imagen al recuento, en segundos",
+    "how.eyebrow": "Método",
+    "how.heading": "Del píxel al *dato*",
     "how.s1.t": "Sube tu imagen",
     "how.s1.b":
       "Arrastra una foto de microscopía. Todo se queda en tu navegador hasta que la analizas.",
@@ -90,7 +90,7 @@ export const translations: Record<Lang, Dict> = {
 
   en: {
     "nav.workspace": "Analysis",
-    "nav.how": "How it works",
+    "nav.how": "Method",
     "nav.cta": "Open analysis",
 
     "hero.eyebrow": "Roboflow × SAM3",
@@ -102,7 +102,7 @@ export const translations: Record<Lang, Dict> = {
     "hero.cta": "Open the analysis",
 
     "ws.eyebrow": "Analysis",
-    "ws.heading": "Analyze particles with SAM3",
+    "ws.heading": "The *lab,* in your browser",
     "ws.subtitle":
       "Upload a microscopy image and detect particles, fibers and fragments. Processing runs on the server with your Roboflow workflow — your key never reaches the browser.",
     "ws.drag": "Drag an image here",
@@ -142,8 +142,8 @@ export const translations: Record<Lang, Dict> = {
     "err.analyze": "Couldn't analyze the image.",
     "err.unexpected": "Unexpected error.",
 
-    "how.eyebrow": "How it works",
-    "how.heading": "From image to count, in seconds",
+    "how.eyebrow": "Method",
+    "how.heading": "From pixel to *data*",
     "how.s1.t": "Upload your image",
     "how.s1.b":
       "Drag in a microscopy photo. Everything stays in your browser until you analyze it.",
@@ -166,7 +166,7 @@ export const translations: Record<Lang, Dict> = {
 
   ca: {
     "nav.workspace": "Anàlisi",
-    "nav.how": "Com funciona",
+    "nav.how": "Mètode",
     "nav.cta": "Obrir anàlisi",
 
     "hero.eyebrow": "Roboflow × SAM3",
@@ -178,7 +178,7 @@ export const translations: Record<Lang, Dict> = {
     "hero.cta": "Obrir l'anàlisi",
 
     "ws.eyebrow": "Anàlisi",
-    "ws.heading": "Analitza partícules amb SAM3",
+    "ws.heading": "El *laboratori,* al navegador",
     "ws.subtitle":
       "Puja una imatge microscòpica i detecta partícules, fibres i fragments. El processament corre al servidor amb el teu workflow de Roboflow — la teva clau mai arriba al navegador.",
     "ws.drag": "Arrossega una imatge aquí",
@@ -218,8 +218,8 @@ export const translations: Record<Lang, Dict> = {
     "err.analyze": "No s'ha pogut analitzar la imatge.",
     "err.unexpected": "Error inesperat.",
 
-    "how.eyebrow": "Com funciona",
-    "how.heading": "De la imatge al recompte, en segons",
+    "how.eyebrow": "Mètode",
+    "how.heading": "Del píxel a la *dada*",
     "how.s1.t": "Puja la teva imatge",
     "how.s1.b":
       "Arrossega una foto de microscòpia. Tot es queda al teu navegador fins que l'analitzes.",
@@ -398,8 +398,118 @@ const sciCa: Dict = {
   "err.aborted": "Anàlisi cancel·lada.",
 };
 
-Object.assign(translations.es, sciEs);
-Object.assign(translations.en, sciEn);
-Object.assign(translations.ca, sciCa);
+// ── Editorial strings (hero meta, manifesto, method intro, colophon) ──
+// `*word*` marks an italic serif accent in display text.
+const edEs: Dict = {
+  "nav.credits": "Créditos",
+  "nav.menu": "Índice",
+  "hero.title_a": "Detectar lo",
+  "hero.title_b": "*invisible*",
+  "hero.meta.project_l": "Proyecto",
+  "hero.meta.project": "Treball de Recerca",
+  "hero.meta.author_l": "Autor",
+  "hero.meta.tutor_l": "Tutora",
+  "hero.meta.centre_l": "Centro",
+  "hero.meta.centre": "Ins Fontanelles",
+  "hero.meta.field_l": "Disciplina",
+  "hero.meta.field": "Visión por computador · Microscopía",
+  "hero.fig": "Fig. 01 — Campo de ondas generado en tiempo real",
+  "manifesto.eyebrow": "Resumen",
+  "manifesto.body":
+    "Fibras, fragmentos, esferas: las micropartículas son *invisibles* a simple vista, pero están en el agua, en el aire y en nosotros. Partikel nace como un Treball de Recerca con una pregunta sencilla — ¿podemos contarlas con *rigor?* — y la responde uniendo visión por computador, segmentación con SAM3 y estadística para convertir una imagen de microscopía en datos medibles, comparables y *reproducibles.*",
+  "manifesto.s1_l": "clases morfológicas detectadas",
+  "manifesto.s2_l": "segmentación a nivel de píxel",
+  "manifesto.s3_l": "medidas calibradas en unidades reales",
+  "how.intro":
+    "Cuatro pasos encadenados transforman una fotografía de microscopio en una tabla de medidas lista para analizar.",
+  "colophon.eyebrow": "Colofón",
+  "colophon.lead":
+    "Concebida, diseñada y programada de principio a fin como parte de un *Treball de Recerca.*",
+  "colophon.signature": "Un proyecto de",
+  "colophon.role.concept": "Concepto, investigación y dirección creativa",
+  "colophon.role.dev": "Diseño y desarrollo web",
+  "colophon.role.tutor": "Tutora del Treball de Recerca",
+  "colophon.role.centre": "Centro",
+  "colophon.centre": "Ins Fontanelles · 2.º de Bachillerato",
+  "colophon.role.tech": "Tecnología",
+  "colophon.role.type": "Tipografía",
+  "colophon.top": "Volver arriba",
+};
+
+const edEn: Dict = {
+  "nav.credits": "Credits",
+  "nav.menu": "Index",
+  "hero.title_a": "Detecting the",
+  "hero.title_b": "*invisible*",
+  "hero.meta.project_l": "Project",
+  "hero.meta.project": "Research Project (Treball de Recerca)",
+  "hero.meta.author_l": "Author",
+  "hero.meta.tutor_l": "Supervisor",
+  "hero.meta.centre_l": "School",
+  "hero.meta.centre": "Ins Fontanelles",
+  "hero.meta.field_l": "Field",
+  "hero.meta.field": "Computer vision · Microscopy",
+  "hero.fig": "Fig. 01 — Wave field rendered in real time",
+  "manifesto.eyebrow": "Abstract",
+  "manifesto.body":
+    "Fibers, fragments, spheres: microparticles are *invisible* to the naked eye, yet they are in our water, our air and ourselves. Partikel began as a Research Project with a simple question — can we count them with *rigor?* — and answers it by combining computer vision, SAM3 segmentation and statistics to turn a microscopy image into measurable, comparable and *reproducible* data.",
+  "manifesto.s1_l": "morphological classes detected",
+  "manifesto.s2_l": "pixel-level segmentation",
+  "manifesto.s3_l": "measurements calibrated in real units",
+  "how.intro":
+    "Four chained steps turn a microscope photograph into a table of measurements ready for analysis.",
+  "colophon.eyebrow": "Colophon",
+  "colophon.lead":
+    "Conceived, designed and coded end to end as part of a *Research Project.*",
+  "colophon.signature": "A project by",
+  "colophon.role.concept": "Concept, research & creative direction",
+  "colophon.role.dev": "Web design & development",
+  "colophon.role.tutor": "Research Project supervisor",
+  "colophon.role.centre": "School",
+  "colophon.centre": "Ins Fontanelles · Year 2 Baccalaureate",
+  "colophon.role.tech": "Technology",
+  "colophon.role.type": "Typography",
+  "colophon.top": "Back to top",
+};
+
+const edCa: Dict = {
+  "nav.credits": "Crèdits",
+  "nav.menu": "Índex",
+  "hero.title_a": "Detectar",
+  "hero.title_b": "*l'invisible*",
+  "hero.meta.project_l": "Projecte",
+  "hero.meta.project": "Treball de Recerca",
+  "hero.meta.author_l": "Autor",
+  "hero.meta.tutor_l": "Tutora",
+  "hero.meta.centre_l": "Centre",
+  "hero.meta.centre": "Ins Fontanelles",
+  "hero.meta.field_l": "Disciplina",
+  "hero.meta.field": "Visió per computador · Microscòpia",
+  "hero.fig": "Fig. 01 — Camp d'ones generat en temps real",
+  "manifesto.eyebrow": "Resum",
+  "manifesto.body":
+    "Fibres, fragments, esferes: les micropartícules són *invisibles* a simple vista, però són a l'aigua, a l'aire i en nosaltres. Partikel neix com un Treball de Recerca amb una pregunta senzilla — les podem comptar amb *rigor?* — i la respon unint visió per computador, segmentació amb SAM3 i estadística per convertir una imatge de microscòpia en dades mesurables, comparables i *reproduïbles.*",
+  "manifesto.s1_l": "classes morfològiques detectades",
+  "manifesto.s2_l": "segmentació a nivell de píxel",
+  "manifesto.s3_l": "mesures calibrades en unitats reals",
+  "how.intro":
+    "Quatre passos encadenats transformen una fotografia de microscopi en una taula de mesures llesta per analitzar.",
+  "colophon.eyebrow": "Colofó",
+  "colophon.lead":
+    "Concebuda, dissenyada i programada de principi a fi com a part d'un *Treball de Recerca.*",
+  "colophon.signature": "Un projecte de",
+  "colophon.role.concept": "Concepte, recerca i direcció creativa",
+  "colophon.role.dev": "Disseny i desenvolupament web",
+  "colophon.role.tutor": "Tutora del Treball de Recerca",
+  "colophon.role.centre": "Centre",
+  "colophon.centre": "Ins Fontanelles · 2n de Batxillerat",
+  "colophon.role.tech": "Tecnologia",
+  "colophon.role.type": "Tipografia",
+  "colophon.top": "Tornar a dalt",
+};
+
+Object.assign(translations.es, sciEs, edEs);
+Object.assign(translations.en, sciEn, edEn);
+Object.assign(translations.ca, sciCa, edCa);
 
 export type TranslationKey = keyof (typeof translations)["es"];
